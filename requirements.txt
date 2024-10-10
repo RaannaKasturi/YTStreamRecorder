@@ -1,6 +1,6 @@
 gradio
-json
 tqdm
 streamlink
 brevo-python
 requests
+python-dotenv
