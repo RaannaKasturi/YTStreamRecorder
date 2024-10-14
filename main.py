@@ -1,65 +1,73 @@
 import os
-import streamlink
 from tqdm import tqdm
 import subprocess
 from get_title import get_youtube_title_id
 from upload import upload_file
 from send_mail import send_email
 import re
+import logging
+from setup_ffmpeg import setup_ffmpeg
+logging.basicConfig(level=logging.DEBUG)
 
 def sanitize_filename(filename):
     return re.sub(r'[<>:"/\\|?*\x00-\x1F]', '_', filename)
 
 def encode_filename(filename):
+    print(f"Encoding file: {filename}")
     sanitized_filename = sanitize_filename(filename)
     outfile = sanitized_filename.replace('.mp4', '_encoded.mp4')
     command = f'ffmpeg -i "{sanitized_filename}" -y -c copy -avoid_negative_ts make_zero "{outfile}"'
     subprocess.run(command, shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
+    print(f"Encoded file saved as: {outfile}")
     return outfile
 
-def download_stream(url, title, filename):
+def run_command(command):
+    cmd = command
+    result = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    return result.stdout
+
+def download_stream(url, title, filename, channel_id):
     filename = sanitize_filename(filename)
-    urls = streamlink.streams(url)
-    stream = urls.get("best")
-    if not stream:
-        print("No streams found!")
-        return None
-    print(f"Downloading Stream: {title}")
     try:
-        with open(filename, 'wb') as out_file:
-            with stream.open() as fd:
-                with tqdm(unit='B', unit_scale=True, desc=filename) as pbar:
-                    while True:
-                        data = fd.read(1024)
-                        if not data:
-                            break
-                        out_file.write(data)
-                        pbar.update(len(data))
+        command = f"./ytarchive --save --verbose --live-from '0h00m00s' -o '{title}' https://www.youtube.com/channel/{channel_id}/live  best"
+        print(f"Running command: {command}")
+        print(f"Downloading Stream: {title}")
+        run_command(command)
+        stream = f'{title}.mp4'
+        if not stream:
+            print("No streams found!")
+            return None
     except KeyboardInterrupt:
         print("\nDownload interrupted! Encoding the partially downloaded file...")
         out = encode_filename(filename)
         if os.path.exists(filename):
             os.remove(filename)
+        out.replace('_encoded.mp4', '.mp4')
         return out
     except Exception as e:
         print(f"An error occurred: {e}")
         if os.path.exists(filename):
             out = encode_filename(filename)
             os.remove(filename)
+        out.replace('_encoded.mp4', '.mp4')
         return out
     out = encode_filename(filename)
     if os.path.exists(filename):
         os.remove(filename)
+    out.replace('_encoded.mp4', '.mp4')
     return out
 
-def main(channel_id, emails, nyberman: bool = False):
+def main_process(channel_id, emails, nyberman: bool = False):
+    print("Checking for live streams...")
     try:
         title, _, url = get_youtube_title_id(channel_id)
     except Exception as e:
         print("No Live Streams Currently.")
         return None
+    print(f"Found live stream: {title}")
     sanitized_title = sanitize_filename(title)
-    file = download_stream(url, sanitized_title, f'{sanitized_title}.mp4')
+    print(f"Downloading stream: {title}")
+    file = download_stream(url, sanitized_title, f'{sanitized_title}.mp4', channel_id)
     if file is None:
         print("No Live Streams Currently.")
         return None
@@ -74,7 +82,7 @@ def main(channel_id, emails, nyberman: bool = False):
             if id:
                 file_url = f"https://buzzheavier.com/f/{id}"
                 print(f"File uploaded successfully! URL: {file_url}")
-                send_email(emails, title, file_url)
+                send_email(emails, title, file_url, youtube_url=url)
                 os.remove(file)
                 return file_url
             else:
@@ -85,3 +93,10 @@ def main(channel_id, emails, nyberman: bool = False):
             print(f"Encoded file not found: {file}")
             os.remove(file)
             return None
+
+
+def main(yt_id, emails: list, nyberman=False):
+    setup_ffmpeg()
+    main_process(yt_id, emails, nyberman)
+
+main('UCtPfbU898Lm-mnCMlpliDaA', ['raannakasturi@gmail.com'], nyberman=False)

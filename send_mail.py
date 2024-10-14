@@ -6,10 +6,10 @@ from dotenv import load_dotenv
 load_dotenv()
 mail_api = os.getenv("MAIL_API")
 
-def mail_body(title, url):
+def mail_body(title, url, yt_url):
     body = f"""
     Hello,
-    Nyberman had a new stream titled "{title}".
+    Nyberman had a new stream titled "{title}" from "{yt_url}".
     You can watch it at {url}.
 
     Regards,
@@ -24,12 +24,11 @@ def email_ids(email_ids):
         emails.append({"email": email})
     return emails
 
-def send_email(emails, title, url):
+def send_email(emails, title, url, yt_url):
     configuration = brevo_python.Configuration()
     configuration.api_key['api-key'] = mail_api
     api_instance = brevo_python.TransactionalEmailsApi(brevo_python.ApiClient(configuration))
-
-    data = mail_body(title=title, url=url)
+    data = mail_body(title=title, url=url, yt_url=yt_url)
     subject = f"'{title}' has been streamed by Nyberman Scientifically!"
     sender = {"name": "Nayan Kasturi", "email": "raanna@silerudaagartha.eu.org"}
     reply_to = {"name": "Nayan Kasturi", "email": "raanna@silerudaagartha.eu.org"}
