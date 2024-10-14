@@ -99,4 +99,4 @@ def main(yt_id, emails: list, nyberman=False):
     setup_ffmpeg()
     main_process(yt_id, emails, nyberman)
 
-main('UCtPfbU898Lm-mnCMlpliDaA', ['raannakasturi@gmail.com'], nyberman=False)
+main('UChXsCcj64gdYp8FVCFTzwiw', ['raannakasturi@gmail.com', 'kothariprarthi@gmail.com'], nyberman=False)
