@@ -58,7 +58,7 @@ def download_stream(url, title, filename, channel_id):
     return out
 
 def main_process(channel_id, emails, nyberman: bool = False):
-    print("Checking for live streams on {channel_id}...")
+    print(f"Checking for live streams on {channel_id}...")
     try:
         title, _, url = get_youtube_title_id(channel_id)
     except Exception as e:
