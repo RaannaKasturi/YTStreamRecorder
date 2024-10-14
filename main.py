@@ -6,7 +6,7 @@ from upload import upload_file
 from send_mail import send_email
 import re
 import logging
-from setup_ffmpeg import setup_ffmpeg
+from setup_env import setup_environ
 logging.basicConfig(level=logging.DEBUG)
 
 def sanitize_filename(filename):
@@ -96,7 +96,7 @@ def main_process(channel_id, emails, nyberman: bool = False):
 
 
 def main(yt_id, emails: list, nyberman=False):
-    setup_ffmpeg()
+    setup_environ()
     main_process(yt_id, emails, nyberman)
 
 main('UCI1vyXBgX3bruwvChLMNxjQ', ['raannakasturi@gmail.com', 'kothariprarthi@gmail.com'], nyberman=False)

@@ -7,36 +7,46 @@ def run_command(command):
 
 def setup_ffmpeg():
     try:
-        cmd1 = "ffmpeg -version"
-        run_command(command)
+        fcmd1 = "ffmpeg -version"
+        run_command(fcmd1)
         print("ffmpeg already installed!")
     except:
         try:
             print("Setting up ffmpeg (SUDO)...")
-            update = "ffmpeg -version"
-            run_command(update)
-            command = "sudo apt-get install ffmpeg"
-            run_command(command)
+            fupdate = "sudo apt-get update"
+            run_command(fupdate)
+            fcmd2 = "sudo apt-get install -y ffmpeg"
+            run_command(fcmd2)
             print("ffmpeg setup complete!")
         except:
-            print("Setting up ffmpeg (SUDO)...")
-            command = "apt-get install ffmpeg"
-            run_command(command)
+            print("Setting up ffmpeg...")
+            fupdate = "sudo apt-get update"
+            run_command(fupdate)
+            fcmd3 = "apt-get install -y ffmpeg"
+            run_command(fcmd3)
             print("ffmpeg setup complete!")
 
 def setup_streamlink():
     try:
-        command = "streamlink -version"
-        run_command(command)
+        scmd = "streamlink -version"
+        run_command(scmd)
         print("streamlink already installed!")
     except:
         try:
+            supdate = "sudo apt-get update"
+            run_command(supdate)
             print("Setting up streamlink (SUDO)...")
-            command = "sudo apt-get install -y streamlink"
-            run_command(command)
+            scmd1 = "sudo apt-get install -y streamlink"
+            run_command(scmd1)
             print("streamlink setup complete!")
         except:
+            supdate = "sudo apt-get update"
+            run_command(supdate)
             print("Setting up streamlink...")
-            command = "apt-get install -y streamlink"
-            run_command(command)
+            scmd2 = "apt-get install -y streamlink"
+            run_command(scmd2)
             print("streamlink setup complete!")
+
+def setup_environ():
+    setup_ffmpeg()
+    setup_streamlink()
